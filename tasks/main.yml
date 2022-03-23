@@ -1,17 +1,10 @@
 ---
-- name: "Download Kibana's deb"
-  get_url:
-    url: "https://artifacts.elastic.co/downloads/kibana/kibana-{{ kibana_version }}-amd64.deb"
-    dest: "/tmp/kibana-{{ kibana_version }}-amd64.deb"
-    mode: 0755
-  register: download_kibana
-  until: download_kibana is succeeded
-- name: Install Kibana
-  become: true
-  apt: deb="/tmp/kibana-{{ kibana_version }}-amd64.deb"
-- name: Configure Kibana
-  become: true
-  template:
-    src: kibana.yml.j2
-    dest: /etc/kibana/kibana.yml
-  notify: restart Kibana
+- name: "Download Kibana's rpm"
+  when: ansible_facts.virtualization_type != "docker"
+  include: rpm.yml
+
+- name: Install Kibana tar.gz (on Docker)
+  when: ( ansible_connection == "community.docker.docker" )
+        or ( ansible_facts.env.container == "podman" )
+        or ( ansible_facts.virtualization_type == "docker" )
+  include: targz.yml

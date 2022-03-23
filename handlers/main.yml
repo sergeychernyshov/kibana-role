@@ -1,7 +1,12 @@
 ---
-# handlers file for kibana-role
-- name: restart Kibana
+- name: restart Kibana systemd
   become: true
   service:
     name: kibana
     state: restarted
+
+- name: restart Kibana binary
+  become: true
+  command:
+    cmd: /etc/profile.d/kibana.sh
+    chdir: "{{ kibana_home }}"
